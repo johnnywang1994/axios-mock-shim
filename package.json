@@ -1,0 +1,34 @@
+{
+  "name": "axios-mock-shim",
+  "version": "1.0.0",
+  "description": "A plugin build for easily using axios-mock-adapter with axios",
+  "main": "./index.js",
+  "dependencies": {
+    "@types/node": "^14.0.11",
+    "axios": "^0.19.2",
+    "axios-mock-adapter": "^1.18.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  },
+  "typings": "./types/index.d.ts",
+  "scripts": {
+    "start": "yarn build:live",
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node ./index.ts",
+    "build": "tsc -p ./src"
+  },
+  "files": [
+    "/dist",
+    "/types",
+    "/package.json",
+    "/index.js",
+    "/yarn.lock"
+  ],
+  "keywords": [
+    "axios",
+    "mock",
+    "api",
+    "adapter"
+  ],
+  "author": "Johnny Wang",
+  "license": "MIT"
+}

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": false,
+    "noLib": false,
+    "preserveConstEnums": true,
+    "noEmitHelpers": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "watch": true,
+    "baseUrl": "..",
+    "outDir": "../dist"
+  },
+  "include": [
+    "types/*"
+  ],
+  "files": [
+    "index.ts",
+    "config.ts",
+    "request.ts",
+    "utils.ts",
+  ]
+}
