@@ -30,5 +30,6 @@
     "adapter"
   ],
   "author": "Johnny Wang",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": "https://github.com/johnnywang1994/axios-mock-shim"
 }
