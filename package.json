@@ -21,7 +21,8 @@
     "/types",
     "/package.json",
     "/index.js",
-    "/yarn.lock"
+    "/LICENSE",
+    "/README.md"
   ],
   "keywords": [
     "axios",
