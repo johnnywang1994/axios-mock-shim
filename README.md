@@ -25,7 +25,7 @@ Import the plugin with two methods `createAxios`, `createAPIHandler`
 import { createAxios, createAPIHandler } from './axios-mock-shim';
 ```
 
-- #### createAxios(axiosConfig)
+- **createAxios(axiosConfig)**
 
 Create Axios instance by given config.
 
@@ -33,7 +33,7 @@ Create Axios instance by given config.
 const instance = createAxios();
 ```
 
-- #### createAPIHandler(axiosInstance, shimOptions)
+- **createAPIHandler(axiosInstance, shimOptions)**
 
 Create an `AxiosRequest` object, which you can then use to define & call the api with specific mock data.
 
@@ -58,25 +58,25 @@ Define your api logic & mock data with your `AxiosRequest` object
 method list: `use`, `with`, `run`
 
 
-- #### use(method, svc, data)
+- **use(method, svc, data)**
 
 Define the api setting
 
-  1. method: http method
-    **required**
-    - type: `string`
+  1. method: http method  
+    **required**  
+    - type: `string` 
 
-  2. svc: url path
-    **required**
-    - type: `string`
+  2. svc: url path  
+    **required**  
+    - type: `string`  
     (note => without baseURL in axios instance)
 
-  3. data: params or data
-    **optional**
+  3. data: params or data  
+    **optional**  
     - type: `object`
 
 
-- #### with(replyHandler)
+- **with(replyHandler)**
 
 Define the mock reply data.
 
@@ -90,7 +90,7 @@ Define the mock reply data.
     > function will get three arguments, when using function type reply, please wrap your data into the first `resolve` method in order to tell the plugin fullfill the Promise.
 
 
-- #### run()
+- **run()**
 
 Execute the `AxiosRequest`
 
