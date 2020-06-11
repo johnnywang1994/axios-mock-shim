@@ -134,23 +134,56 @@ export default {
 
 ### useMock
 
+  - Type: `boolean`
+
 Required to set whether using mock-adapter. no default value.
 
 
 ### snakifyData
 
+  - Type: `boolean`
+
 Whether snakify keys in params or data in request.
 
 
+### beforeRequest
+
+  - Type: `Function`
+
+provide a way to dynamically inject some axios config each request, such as getting localStorage data into `header`.
+
+it will give you the default params to send to request.
+
+if this property is not set, it will use the default params to call
+
+> Be careful not to overwrite the `method`, `data` or `params` property here, or you may send a wrong request every request.
+
+```js
+const api = createAPIHandler(instance, {
+  beforeRequest(params) {
+    const TOKEN = localStorage.getItem('TOKEN');
+    return Object.assign(params, {
+      headers: {
+        'Content-Type': 'application/json',
+        'My-Token': TOKEN,
+      },
+    });
+  },
+});
+```
+
+
 ### beforeResponse
+
+  - Type: `Function`
 
 You can specify what to do before getting the response, eg.
 
 ```js
 const api = createAPIHandler(instance, {
   useMock: true,
-  beforeResponse(res) {
-    return camelizeKeys(res.data);
+  beforeResponse(response) {
+    return camelizeKeys(response.data);
   },
 });
 ```

@@ -12,6 +12,7 @@ export interface IMockHandlerParams {
 export interface ICreateAPIOptions {
   useMock: boolean;
   anyReply?: any;
+  beforeRequest?: Function;
   beforeResponse?: Function;
   snakifyData?: boolean;
 }

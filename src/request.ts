@@ -154,18 +154,21 @@ AxiosRequest.prototype = {
 
   normalRequest(method, svc, data) {
     const { $instance, $options } = this;
-    const { beforeResponse, snakifyData } = $options;
+    const { beforeRequest, beforeResponse, snakifyData } = $options;
     if (!httpMethodList.has(method.toUpperCase())) return warn(
       'Invalid http method',
       method,
     );
-    return $instance({
+    const params = {
       method,
       url: svc,
       [method.toUpperCase() === 'GET'
         ? 'params'
         : 'data'
       ]: snakifyData ? snakifyKeys(data) : data,
-    }).then(beforeResponse ? beforeResponse : (res) => res);
+    };
+    return $instance(
+      beforeRequest ? beforeRequest(params) : params
+    ).then(beforeResponse ? beforeResponse : (res) => res);
   },
 }
