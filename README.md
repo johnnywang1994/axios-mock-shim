@@ -27,7 +27,7 @@ import { createAxios, createAPIHandler } from './axios-mock-shim';
 
 - **createAxios(axiosConfig)**
 
-Create Axios instance by given config.
+Create Axios instance by given config.（default config or your custom config）
 
 ```js
 const instance = createAxios();
@@ -157,6 +157,31 @@ const api = createAPIHandler(instance, {
     }]);
   },
 });
+```
+
+
+## Default setting
+
+### Mock Adapter Config
+
+```js
+const mockDefaultConfig = {
+  delayResponse: 500,
+  onNoMatch: "passthrough",
+}
+```
+
+### Axios Config
+
+```js
+const axiosDefaultConfig = {
+  baseURL: '/api/',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 5000,
+  withCredentials: true,
+}
 ```
 
 
