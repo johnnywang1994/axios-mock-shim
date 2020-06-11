@@ -134,7 +134,7 @@ AxiosRequest.prototype = {
 
   normalRequest(method, svc, data) {
     const { $instance, $options } = this;
-    const { beforeResponse, catchError } = $options;
+    const { beforeResponse } = $options;
     if (!httpMethodList.has(method.toUpperCase())) return warn(
       'Invalid http method',
       method,
@@ -146,7 +146,6 @@ AxiosRequest.prototype = {
         ? 'params'
         : 'data'
       ]: data,
-    }).then(beforeResponse ? beforeResponse : (res) => res)
-      .catch(catchError ? catchError : (err) => err);
+    }).then(beforeResponse ? beforeResponse : (res) => res);
   },
 }

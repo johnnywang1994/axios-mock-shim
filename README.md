@@ -137,6 +137,20 @@ export default {
 Required to set whether using mock-adapter. no default value.
 
 
+### beforeResponse
+
+You can specify what to do before getting the response, eg.
+
+```js
+const api = createAPIHandler(instance, {
+  useMock: true,
+  beforeResponse(res) {
+    return camelizeKeys(res.data);
+  },
+});
+```
+
+
 ### anyReply
 
 If you need to mock every request which without using `with` to set its mock data, this property could that you define a fallback reply which will be used for all unhandled request.
