@@ -18,6 +18,7 @@ import {
   AxiosInstance
 } from '../types/index.d';
 
+// Cache for whole page
 const RequestCache = new Set();
 
 
@@ -79,50 +80,68 @@ export function AxiosRequest(
   this.$options = options;
   this.$instance = instance;
   this.$adapter = null;
-  this.mockReply = null;
-  this.run = () => {};
+  this.ReplyCache = new Map();
+  this.runBuilder = () => {};
+  this.init();
 }
 
 AxiosRequest.prototype = {
 
-  use(...args: any[]) {
+  init() {
     const { $instance } = this;
     const { useMock } = this.$options;
     if (useMock) {
       this.$adapter = createMock($instance);
     }
-    // run will return a [Promise]
-    this.run = useMock
-      ? () => this.useMockRequest(...args)
-      : () => this.normalRequest(...args);
-    return this;
+    // runBuilder return the correct method for run
+    this.runBuilder = useMock
+      ? (...args) => () => this.useMockRequest(...args)
+      : (...args) => () => this.normalRequest(...args);
   },
 
+  use(method, svc, data = {}) {
+    const parent = this;
+    const { ReplyCache } = this;
+    const cacheToken = stringify(method, svc, data);
 
-  with(fn: Function | any[]) {
-    const invalid = !isFn(fn) && !isArray(fn);
-    if (invalid) return warn(
-      'reply invalid, should be type Function or Array',
-      fn,
-    );
-    this.mockReply = fn;
-    return this;
+    // Return an object to define mock data & calling
+    return {
+      with(fn: Function | any[]) {
+        const invalid = !isFn(fn) && !isArray(fn);
+        if (invalid) return warn(
+          'reply invalid, should be type Function or Array',
+          fn,
+        );
+        ReplyCache.set(cacheToken, fn);
+        return this;
+      },
+      run: parent.runBuilder.apply(parent, [method, svc, data]),
+    };
   },
 
 
   useMockRequest(method, svc, data = {}) {
-    const { normalRequest, mockReply, $adapter } = this;
+    const { normalRequest, $adapter, ReplyCache } = this;
     const cacheToken = stringify(method, svc, data);
 
     // with mockReply defined & not yet cached
     const hasCache = RequestCache.has(cacheToken);
     if (!hasCache) {
       RequestCache.add(cacheToken);
-      if (mockReply) {
-        mockHandler.call($adapter, { method, svc, data }, mockReply);
+      // check if cache has the mock data
+      if (ReplyCache.has(cacheToken)) {
+        mockHandler.call(
+          $adapter,
+          { method, svc, data },
+          ReplyCache.get(cacheToken),
+        );
       } else {
         const { anyReply } = this.$options;
-        anyReply && mockHandler.call($adapter, { method, svc, data }, anyReply);
+        anyReply && mockHandler.call(
+          $adapter,
+          { method, svc, data },
+          anyReply,
+        );
       }
     }
 
