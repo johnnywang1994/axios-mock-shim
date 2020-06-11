@@ -22,7 +22,7 @@ yarn add axios-mock-shim
 Import the plugin with two methods `createAxios`, `createAPIHandler`
 
 ```js
-import { createAxios, createAPIHandler } from './axios-mock-shim';
+import { createAxios, createAPIHandler } from 'axios-mock-shim';
 ```
 
 - **createAxios(axiosConfig)**
