@@ -1,32 +1,3 @@
-function camelizeStr(str: string): string {
-  return str.replace(/[_.-](\w|$)/g, (_, x) => x.toUpperCase());
-}
-
-function snakifyStr(str: string): string {
-  return str.replace(/(?:^|\.?)([A-Z])/g, (_, x) => `_${x.toLowerCase()}`);
-}
-
-function convertCase(convertFunc: Function): Function {
-  function converter(thing: any): any {
-    if (thing instanceof Array) {
-      return thing.map((i) => converter(i));
-    }
-    if (thing instanceof Object) {
-      const newObj = {};
-      Object.keys(thing).forEach((k) => {
-        (newObj as any)[convertFunc(k)] = converter(thing[k]);
-      });
-      return newObj;
-    }
-    return thing;
-  }
-  return converter;
-}
-
-export const camelizeKeys = convertCase(camelizeStr);
-
-export const snakifyKeys = convertCase(snakifyStr);
-
 export function isFn(v) {
   return v !== null && typeof v === 'function';
 }

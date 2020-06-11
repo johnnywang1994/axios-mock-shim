@@ -11,6 +11,9 @@ export interface IMockHandlerParams {
 
 export interface ICreateAPIOptions {
   useMock: boolean;
+  anyReply?: any;
+  beforeResponse?: Function;
+  catchError?: Function;
 }
 
 export {
