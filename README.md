@@ -137,6 +137,11 @@ export default {
 Required to set whether using mock-adapter. no default value.
 
 
+### snakifyData
+
+Whether snakify keys in params or data in request.
+
+
 ### beforeResponse
 
 You can specify what to do before getting the response, eg.

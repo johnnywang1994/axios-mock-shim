@@ -13,6 +13,7 @@ export interface ICreateAPIOptions {
   useMock: boolean;
   anyReply?: any;
   beforeResponse?: Function;
+  snakifyData?: boolean;
 }
 
 export {

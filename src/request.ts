@@ -2,6 +2,7 @@
 const MockAdapter = require('axios-mock-adapter');
 
 import {
+  snakifyKeys,
   firstUp,
   isArray,
   isFn,
@@ -153,7 +154,7 @@ AxiosRequest.prototype = {
 
   normalRequest(method, svc, data) {
     const { $instance, $options } = this;
-    const { beforeResponse } = $options;
+    const { beforeResponse, snakifyData } = $options;
     if (!httpMethodList.has(method.toUpperCase())) return warn(
       'Invalid http method',
       method,
@@ -164,7 +165,7 @@ AxiosRequest.prototype = {
       [method.toUpperCase() === 'GET'
         ? 'params'
         : 'data'
-      ]: data,
+      ]: snakifyData ? snakifyKeys(data) : data,
     }).then(beforeResponse ? beforeResponse : (res) => res);
   },
 }
