@@ -107,6 +107,6 @@ AxiosRequest.prototype = {
         const { beforeRequest, beforeResponse } = $options;
         if (!httpMethodList.has(method.toUpperCase()))
             return warn('Invalid http method', method);
-        return $instance[method](svc, beforeRequest ? beforeRequest(data) : data).then(beforeResponse ? beforeResponse : (res) => res);
+        return $instance[method.toLowerCase()](svc, beforeRequest ? beforeRequest(data) : data).then(beforeResponse ? beforeResponse : (res) => res);
     },
 };

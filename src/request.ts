@@ -163,7 +163,7 @@ AxiosRequest.prototype = {
       'Invalid http method',
       method,
     );
-    return $instance[method](
+    return $instance[method.toLowerCase()](
       svc,
       beforeRequest ? beforeRequest(data) : data
     ).then(beforeResponse ? beforeResponse : (res) => res);
