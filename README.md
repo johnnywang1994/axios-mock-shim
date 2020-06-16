@@ -100,7 +100,7 @@ export default {
 
   // array type reply
   getProfile() {
-    return api.use('get', 'solo/config').with([200, {
+    return api.use('get', 'solo/config', { params: { token: 1 } }).with([200, {
       data: {
         number: 10,
       }
@@ -109,18 +109,19 @@ export default {
 
   // function type reply
   getSoloConfig() {
-    return api.use('get', 'profile').with((resolve, reject, config) => {
-      console.log(config); // mock-adapter's config
-      res([
-        200,
-        {
-          data: {
-            name: 'Johnny',
-            money: 1000,
-          },
-        }
-      ]);
-    }).run();
+    return api.use('get', 'profile', { id: 100 })
+      .with((resolve, reject, config) => {
+        console.log(config); // mock-adapter's config
+        res([
+          200,
+          {
+            data: {
+              name: 'Johnny',
+              money: 1000,
+            },
+          }
+        ]);
+      }).run();
   },
 
   // If no need for mock
@@ -143,7 +144,7 @@ Required to set whether using mock-adapter. no default value.
 
   - Type: `boolean`
 
-Whether snakify keys in params or data in request.
+Whether snakify keys in params or data in request. SnakifyKeys will run before the `beforeRequest`, those config added by `beforeRequest` will not auto apply the `snakifyKeys` method.
 
 
 ### beforeRequest
@@ -156,13 +157,14 @@ it will give you the default params to send to request.
 
 if this property is not set, it will use the default params to call
 
-> Be careful not to overwrite the `method`, `data` or `params` property here, or you may send a wrong request every request.
+> The axios instance will call such as `axios.post()` but not `axios()` to send the request in order to match the mock-adapter's setting, using `axios()` with sending data will cause 404 error!!
+See: [Mock failed with 404 Error](https://github.com/ctimmerm/axios-mock-adapter/issues/116)
 
 ```js
 const api = createAPIHandler(instance, {
-  beforeRequest(params) {
+  beforeRequest(config) {
     const TOKEN = localStorage.getItem('TOKEN');
-    return Object.assign(params, {
+    return Object.assign(config, {
       headers: {
         'Content-Type': 'application/json',
         'My-Token': TOKEN,

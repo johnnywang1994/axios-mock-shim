@@ -108,6 +108,8 @@ AxiosRequest.prototype = {
     // Return an object to define mock data & calling
     return {
       with(fn: Function | any[]) {
+        const { useMock } = parent.$options;
+        if (!useMock) return this;
         const invalid = !isFn(fn) && !isArray(fn);
         if (invalid) return warn(
           'reply invalid, should be type Function or Array',
@@ -122,8 +124,11 @@ AxiosRequest.prototype = {
 
 
   useMockRequest(method, svc, data = {}) {
-    const { normalRequest, $adapter, ReplyCache } = this;
+    const { normalRequest, $adapter, ReplyCache, $options } = this;
+    const { snakifyData, anyReply } = $options;
     const cacheToken = stringify(method, svc, data);
+    data = snakifyData ? snakifyKeys(data) : data;
+    let config = { method, svc, data };
 
     // with mockReply defined & not yet cached
     const hasCache = RequestCache.has(cacheToken);
@@ -133,14 +138,13 @@ AxiosRequest.prototype = {
       if (ReplyCache.has(cacheToken)) {
         mockHandler.call(
           $adapter,
-          { method, svc, data },
+          config,
           ReplyCache.get(cacheToken),
         );
       } else {
-        const { anyReply } = this.$options;
         anyReply && mockHandler.call(
           $adapter,
-          { method, svc, data },
+          config,
           anyReply,
         );
       }
@@ -154,21 +158,14 @@ AxiosRequest.prototype = {
 
   normalRequest(method, svc, data) {
     const { $instance, $options } = this;
-    const { beforeRequest, beforeResponse, snakifyData } = $options;
+    const { beforeRequest, beforeResponse } = $options;
     if (!httpMethodList.has(method.toUpperCase())) return warn(
       'Invalid http method',
       method,
     );
-    const params = {
-      method,
-      url: svc,
-      [method.toUpperCase() === 'GET'
-        ? 'params'
-        : 'data'
-      ]: snakifyData ? snakifyKeys(data) : data,
-    };
-    return $instance(
-      beforeRequest ? beforeRequest(params) : params
+    return $instance[method](
+      svc,
+      beforeRequest ? beforeRequest(data) : data
     ).then(beforeResponse ? beforeResponse : (res) => res);
   },
 }
