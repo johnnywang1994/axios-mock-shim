@@ -17,6 +17,11 @@ export interface ICreateAPIOptions {
   snakifyData?: boolean;
 }
 
+export interface IUseObject {
+  with: Function,
+  run: Function,
+}
+
 export {
   AxiosInstance,
   AxiosRequestConfig

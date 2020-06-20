@@ -16,8 +16,12 @@ import {
   MockAdapterOptions,
   IMockHandlerParams,
   ICreateAPIOptions,
-  AxiosInstance
+  AxiosInstance,
+  IUseObject
 } from '../types/index.d';
+import {
+  AxiosRequestConfig,
+} from '../types/axios.d';
 
 // Cache for whole page
 const RequestCache = new Set();
@@ -88,7 +92,7 @@ export function AxiosRequest(
 
 AxiosRequest.prototype = {
 
-  init() {
+  init(): void {
     const { $instance } = this;
     const { useMock } = this.$options;
     if (useMock) {
@@ -100,7 +104,7 @@ AxiosRequest.prototype = {
       : (...args) => () => this.normalRequest(...args);
   },
 
-  use(method, svc, data = {}) {
+  use(method, svc, data = {}): IUseObject {
     const parent = this;
     const { ReplyCache } = this;
     const cacheToken = stringify(method, svc, data);
@@ -123,7 +127,7 @@ AxiosRequest.prototype = {
   },
 
 
-  useMockRequest(method, svc, data = {}) {
+  useMockRequest(method, svc, data = {}): AxiosRequestConfig {
     const { normalRequest, $adapter, ReplyCache, $options } = this;
     const { snakifyData, anyReply } = $options;
     const cacheToken = stringify(method, svc, data);
@@ -156,7 +160,7 @@ AxiosRequest.prototype = {
   },
 
 
-  normalRequest(method, svc, data) {
+  normalRequest(method, svc, data): AxiosRequestConfig | void {
     const { $instance, $options } = this;
     const { beforeRequest, beforeResponse } = $options;
     if (!httpMethodList.has(method.toUpperCase())) return warn(
