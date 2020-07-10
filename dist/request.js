@@ -1,9 +1,28 @@
 /* eslint-disable */
 const MockAdapter = require('axios-mock-adapter');
 import { snakifyKeys, firstUp, isArray, isFn, stringify, warn } from './utils';
-import { mockDefaultConfig, httpMethodList } from './config';
+import { mockDefaultConfig, httpMethodList, useDataMethodList } from './config';
 // Cache for whole page
 const RequestCache = new Set();
+/**
+ * Create config for real axios request
+ *
+ * @param instance
+ * @param config
+ */
+function configHandler({ methodUp, beforeRequest, data }) {
+    const config = [];
+    if (useDataMethodList.has(methodUp)) {
+        config[0] = data;
+        beforeRequest
+            ? config[1] = beforeRequest({})
+            : false;
+    }
+    else {
+        config[0] = beforeRequest ? beforeRequest(data) : data;
+    }
+    return config;
+}
 /**
  * Create mock adapter instance
  *
@@ -20,18 +39,20 @@ function createMock(instance, config = {}) {
  * @param param1 [required]: api params
  * @param mockData [required]: mock data list
  */
-function mockHandler({ method, svc, data }, mockReply) {
+function mockHandler({ method, svc, config }, mockReply) {
     const mock = this;
+    // handler choose
     let handler;
     if (isFn(mockReply)) {
-        handler = function mockReplyHandler(config) {
-            return new Promise((resolve, reject) => mockReply(resolve, reject, config));
+        handler = function mockReplyHandler(mockConfig) {
+            return new Promise((resolve, reject) => mockReply(resolve, reject, mockConfig));
         };
     }
     else {
         handler = mockReply;
     }
-    mock[`on${firstUp(method)}`](svc, data)
+    // config handling
+    mock[`on${firstUp(method)}`](svc, ...config)
         .reply.apply(mock, isFn(handler) ? [handler] : handler);
 }
 /**
@@ -82,31 +103,37 @@ AxiosRequest.prototype = {
     },
     useMockRequest(method, svc, data = {}) {
         const { normalRequest, $adapter, ReplyCache, $options } = this;
-        const { snakifyData, anyReply } = $options;
+        const { snakifyData, anyReply, beforeRequest } = $options;
+        const methodUp = method.toUpperCase();
         const cacheToken = stringify(method, svc, data);
         data = snakifyData ? snakifyKeys(data) : data;
-        let config = { method, svc, data };
+        let configs = {
+            method,
+            svc,
+            config: configHandler({ methodUp, beforeRequest, data }),
+        };
         // with mockReply defined & not yet cached
         const hasCache = RequestCache.has(cacheToken);
         if (!hasCache) {
             RequestCache.add(cacheToken);
             // check if cache has the mock data
             if (ReplyCache.has(cacheToken)) {
-                mockHandler.call($adapter, config, ReplyCache.get(cacheToken));
+                mockHandler.call($adapter, configs, ReplyCache.get(cacheToken));
             }
             else {
-                anyReply && mockHandler.call($adapter, config, anyReply);
+                anyReply && mockHandler.call($adapter, configs, anyReply);
             }
         }
         // Important!! Don't remove this return
         // This return stays for Promise mechanism
-        return normalRequest.call(this, method, svc, data);
+        return normalRequest.call(this, configs);
     },
-    normalRequest(method, svc, data) {
+    normalRequest({ method, svc, config }) {
         const { $instance, $options } = this;
-        const { beforeRequest, beforeResponse } = $options;
-        if (!httpMethodList.has(method.toUpperCase()))
+        const { beforeResponse } = $options;
+        const methodUp = method.toUpperCase();
+        if (!httpMethodList.has(methodUp))
             return warn('Invalid http method', method);
-        return $instance[method.toLowerCase()](svc, beforeRequest ? beforeRequest(data) : data).then(beforeResponse ? beforeResponse : (res) => res);
+        return $instance[method.toLowerCase()](svc, ...config).then(beforeResponse ? beforeResponse : (res) => res);
     },
 };

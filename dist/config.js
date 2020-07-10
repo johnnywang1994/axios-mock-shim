@@ -19,3 +19,8 @@ export const httpMethodList = new Set([
     'PATCH',
     'OPTIONS',
 ]);
+export const useDataMethodList = new Set([
+    'POST',
+    'PUT',
+    'PATCH',
+]);
