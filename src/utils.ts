@@ -43,12 +43,8 @@ export function firstUp(str: string): string {
   return str[0].toUpperCase() + str.slice(1);
 }
 
-export function stringify(method, svc, data) {
-  return JSON.stringify({
-    method,
-    svc,
-    data
-  });
+export function stringify(configs) {
+  return JSON.stringify(configs);
 }
 
 export function warn(msg, ...args) {

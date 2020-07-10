@@ -34,12 +34,8 @@ export function isArray(v) {
 export function firstUp(str) {
     return str[0].toUpperCase() + str.slice(1);
 }
-export function stringify(method, svc, data) {
-    return JSON.stringify({
-        method,
-        svc,
-        data
-    });
+export function stringify(configs) {
+    return JSON.stringify(configs);
 }
 export function warn(msg, ...args) {
     console.error('[axios-mock-shim]: ' + msg, ...args);

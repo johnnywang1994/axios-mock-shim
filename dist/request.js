@@ -52,7 +52,7 @@ function mockHandler({ method, svc, config }, mockReply) {
         handler = mockReply;
     }
     // config handling
-    mock[`on${firstUp(method)}`](svc, ...config)
+    mock[`on${firstUp(method)}`](svc, config[0])
         .reply.apply(mock, isFn(handler) ? [handler] : handler);
 }
 /**
@@ -87,7 +87,6 @@ AxiosRequest.prototype = {
         const { ReplyCache, $options } = this;
         const { snakifyData, beforeRequest } = $options;
         const methodUp = method.toUpperCase();
-        const cacheToken = stringify(method, svc, data);
         data = snakifyData ? snakifyKeys(data) : data;
         let configs = {
             method,
@@ -95,6 +94,7 @@ AxiosRequest.prototype = {
             data,
             config: configHandler({ methodUp, beforeRequest, data }),
         };
+        const cacheToken = stringify(configs);
         // Return an object to define mock data & calling
         return {
             with(fn) {
@@ -107,14 +107,13 @@ AxiosRequest.prototype = {
                 ReplyCache.set(cacheToken, fn);
                 return this;
             },
-            run: parent.runBuilder.apply(parent, [configs]),
+            run: parent.runBuilder.call(parent, configs),
         };
     },
     useMockRequest(configs) {
-        const { method, svc, data } = configs;
         const { normalRequest, $adapter, ReplyCache, $options } = this;
         const { anyReply } = $options;
-        const cacheToken = stringify(method, svc, data);
+        const cacheToken = stringify(configs);
         // with mockReply defined & not yet cached
         const hasCache = RequestCache.has(cacheToken);
         if (!hasCache) {
