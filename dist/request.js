@@ -39,7 +39,7 @@ function createMock(instance, config = {}) {
  * @param param1 [required]: api params
  * @param mockData [required]: mock data list
  */
-function mockHandler({ method, svc, config }, mockReply) {
+function mockHandler({ method, svc, data }, mockReply) {
     const mock = this;
     // handler choose
     let handler;
@@ -52,7 +52,7 @@ function mockHandler({ method, svc, config }, mockReply) {
         handler = mockReply;
     }
     // config handling
-    mock[`on${firstUp(method)}`](svc, ...config)
+    mock[`on${firstUp(method)}`](svc, data)
         .reply.apply(mock, isFn(handler) ? [handler] : handler);
 }
 /**
@@ -110,6 +110,7 @@ AxiosRequest.prototype = {
         let configs = {
             method,
             svc,
+            data,
             config: configHandler({ methodUp, beforeRequest, data }),
         };
         // with mockReply defined & not yet cached

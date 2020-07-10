@@ -6,6 +6,7 @@ export interface MockAdapterOptions {
 export interface IMockHandlerParams {
   method: string;
   svc: string;
+  data?: Object;
   config?: Array<any>;
 }
 

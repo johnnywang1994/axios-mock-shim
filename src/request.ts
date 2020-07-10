@@ -70,7 +70,7 @@ function createMock(
  */
 function mockHandler(
   this: any,
-  { method, svc, config }: IMockHandlerParams,
+  { method, svc, data }: IMockHandlerParams,
   mockReply,
 ): void {
   const mock = this;
@@ -87,10 +87,7 @@ function mockHandler(
   }
   // config handling
   mock
-    [`on${firstUp(method)}`](
-      svc,
-      ...config, // same with real axios config
-    )
+    [`on${firstUp(method)}`](svc, data)
     .reply.apply(mock, isFn(handler) ? [handler] : handler);
 }
 
@@ -158,6 +155,7 @@ AxiosRequest.prototype = {
     let configs = {
       method,
       svc,
+      data,
       config: configHandler({ methodUp, beforeRequest, data }),
     };
 
