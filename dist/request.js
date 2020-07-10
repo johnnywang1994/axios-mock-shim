@@ -39,7 +39,7 @@ function createMock(instance, config = {}) {
  * @param param1 [required]: api params
  * @param mockData [required]: mock data list
  */
-function mockHandler({ method, svc, data }, mockReply) {
+function mockHandler({ method, svc, config }, mockReply) {
     const mock = this;
     // handler choose
     let handler;
@@ -52,7 +52,7 @@ function mockHandler({ method, svc, data }, mockReply) {
         handler = mockReply;
     }
     // config handling
-    mock[`on${firstUp(method)}`](svc, data)
+    mock[`on${firstUp(method)}`](svc, ...config)
         .reply.apply(mock, isFn(handler) ? [handler] : handler);
 }
 /**
@@ -84,8 +84,17 @@ AxiosRequest.prototype = {
     },
     use(method, svc, data = {}) {
         const parent = this;
-        const { ReplyCache } = this;
+        const { ReplyCache, $options } = this;
+        const { snakifyData, beforeRequest } = $options;
+        const methodUp = method.toUpperCase();
         const cacheToken = stringify(method, svc, data);
+        data = snakifyData ? snakifyKeys(data) : data;
+        let configs = {
+            method,
+            svc,
+            data,
+            config: configHandler({ methodUp, beforeRequest, data }),
+        };
         // Return an object to define mock data & calling
         return {
             with(fn) {
@@ -98,21 +107,14 @@ AxiosRequest.prototype = {
                 ReplyCache.set(cacheToken, fn);
                 return this;
             },
-            run: parent.runBuilder.apply(parent, [method, svc, data]),
+            run: parent.runBuilder.apply(parent, [configs]),
         };
     },
-    useMockRequest(method, svc, data = {}) {
+    useMockRequest(configs) {
+        const { method, svc, data } = configs;
         const { normalRequest, $adapter, ReplyCache, $options } = this;
-        const { snakifyData, anyReply, beforeRequest } = $options;
-        const methodUp = method.toUpperCase();
+        const { anyReply } = $options;
         const cacheToken = stringify(method, svc, data);
-        data = snakifyData ? snakifyKeys(data) : data;
-        let configs = {
-            method,
-            svc,
-            data,
-            config: configHandler({ methodUp, beforeRequest, data }),
-        };
         // with mockReply defined & not yet cached
         const hasCache = RequestCache.has(cacheToken);
         if (!hasCache) {
@@ -132,8 +134,7 @@ AxiosRequest.prototype = {
     normalRequest({ method, svc, config }) {
         const { $instance, $options } = this;
         const { beforeResponse } = $options;
-        const methodUp = method.toUpperCase();
-        if (!httpMethodList.has(methodUp))
+        if (!httpMethodList.has(method.toUpperCase()))
             return warn('Invalid http method', method);
         return $instance[method.toLowerCase()](svc, ...config).then(beforeResponse ? beforeResponse : (res) => res);
     },
