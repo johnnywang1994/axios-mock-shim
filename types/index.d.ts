@@ -21,7 +21,9 @@ export interface ICreateAPIOptions {
 export interface IUseObject {
   with: Function,
   mock: Function,
+  mockOnce: Function,
   run: Function,
+  runOnce: Function
 }
 
 export {

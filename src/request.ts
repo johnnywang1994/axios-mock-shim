@@ -72,6 +72,7 @@ function mockHandler(
   this: any,
   { method, svc, config }: IMockHandlerParams,
   mockReply,
+  once: Boolean,
 ): void {
   const mock = this;
   // handler choose
@@ -88,7 +89,7 @@ function mockHandler(
   // config handling
   mock
     [`on${firstUp(method)}`](svc, config[0])
-    .reply.apply(mock, isFn(handler) ? [handler] : handler);
+    [once ? 'replyOnce' : 'reply'].apply(mock, isFn(handler) ? [handler] : handler);
 }
 
 /**
@@ -154,45 +155,54 @@ AxiosRequest.prototype = {
       mock() {
         const { useMock } = parent.$options;
         if (!useMock) return this; // if dont use mock, return this.
-        _mock.call(parent, configs);
+        _mock.call(parent, configs, false);
+        return this;
+      },
+      mockOnce() {
+        const { useMock } = parent.$options;
+        if (!useMock) return this; // if dont use mock, return this.
+        _mock.call(parent, configs, true);
         return this;
       },
       // pass configs to runBuilder
       // "run" will become a function, eg. "() => this._useMockRequest()"
-      run: parent.runBuilder.call(parent, configs),
+      run: parent.runBuilder.call(parent, configs, false),
+      runOnce: parent.runBuilder.call(parent, configs, true)
     };
   },
 
-  _mock(configs) {
+  _mock(configs, once) {
     const { $adapter, ReplyCache, $options } = this;
     const { anyReply } = $options;
     const cacheToken = stringify(configs);
     const hasCache = RequestCache.has(cacheToken);
     // check cache, avoid duplicate mocked
     if (!hasCache) {
-      RequestCache.add(cacheToken);
+      !once ? RequestCache.add(cacheToken) : false;
       // check if cache has the mock data
       if (ReplyCache.has(cacheToken)) {
         mockHandler.call(
           $adapter,
           configs,
           ReplyCache.get(cacheToken),
+          once,
         );
       } else {
         anyReply && mockHandler.call(
           $adapter,
           configs,
           anyReply,
+          once,
         );
       }
     }
   },
 
-  _useMockRequest(configs): AxiosRequestConfig {
+  _useMockRequest(configs, once): AxiosRequestConfig {
     const { _mock, _normalRequest } = this;
 
     // mock api
-    _mock.call(this, configs);
+    _mock.call(this, configs, once);
 
     // Important!! Don't remove this return
     // This return stays for Promise mechanism

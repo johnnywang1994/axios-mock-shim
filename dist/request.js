@@ -39,7 +39,7 @@ function createMock(instance, config = {}) {
  * @param param1 [required]: api params
  * @param mockData [required]: mock data list
  */
-function mockHandler({ method, svc, config }, mockReply) {
+function mockHandler({ method, svc, config }, mockReply, once) {
     const mock = this;
     // handler choose
     let handler;
@@ -52,8 +52,7 @@ function mockHandler({ method, svc, config }, mockReply) {
         handler = mockReply;
     }
     // config handling
-    mock[`on${firstUp(method)}`](svc, config[0])
-        .reply.apply(mock, isFn(handler) ? [handler] : handler);
+    mock[`on${firstUp(method)}`](svc, config[0])[once ? 'replyOnce' : 'reply'].apply(mock, isFn(handler) ? [handler] : handler);
 }
 /**
  * Class of AxiosRequest
@@ -111,35 +110,43 @@ AxiosRequest.prototype = {
                 const { useMock } = parent.$options;
                 if (!useMock)
                     return this; // if dont use mock, return this.
-                _mock.call(parent, configs);
+                _mock.call(parent, configs, false);
+                return this;
+            },
+            mockOnce() {
+                const { useMock } = parent.$options;
+                if (!useMock)
+                    return this; // if dont use mock, return this.
+                _mock.call(parent, configs, true);
                 return this;
             },
             // pass configs to runBuilder
             // "run" will become a function, eg. "() => this._useMockRequest()"
-            run: parent.runBuilder.call(parent, configs),
+            run: parent.runBuilder.call(parent, configs, false),
+            runOnce: parent.runBuilder.call(parent, configs, true)
         };
     },
-    _mock(configs) {
+    _mock(configs, once) {
         const { $adapter, ReplyCache, $options } = this;
         const { anyReply } = $options;
         const cacheToken = stringify(configs);
         const hasCache = RequestCache.has(cacheToken);
         // check cache, avoid duplicate mocked
         if (!hasCache) {
-            RequestCache.add(cacheToken);
+            !once ? RequestCache.add(cacheToken) : false;
             // check if cache has the mock data
             if (ReplyCache.has(cacheToken)) {
-                mockHandler.call($adapter, configs, ReplyCache.get(cacheToken));
+                mockHandler.call($adapter, configs, ReplyCache.get(cacheToken), once);
             }
             else {
-                anyReply && mockHandler.call($adapter, configs, anyReply);
+                anyReply && mockHandler.call($adapter, configs, anyReply, once);
             }
         }
     },
-    _useMockRequest(configs) {
+    _useMockRequest(configs, once) {
         const { _mock, _normalRequest } = this;
         // mock api
-        _mock.call(this, configs);
+        _mock.call(this, configs, once);
         // Important!! Don't remove this return
         // This return stays for Promise mechanism
         return _normalRequest.call(this, configs);
