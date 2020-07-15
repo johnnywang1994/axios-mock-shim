@@ -31,6 +31,11 @@ Create Axios instance by given config.（default config or your custom config）
 
 ```js
 const instance = createAxios();
+
+// eg.
+instance.interceptors.response.use(
+  //...
+);
 ```
 
 - **createAPIHandler(axiosInstance, shimOptions)**
@@ -80,9 +85,9 @@ Define the api setting
 
 Define the mock reply data.
 
-> If your set `useMock` to `false`, then no need to call this method.
+> If set `useMock` to `false`, then no need to call this method.
 
-> Even you call this method with `useMock` set by `false`, it will still skip the mock feature automatically.
+> Even call this method with `useMock` set by `false`, it will still skip the mock feature automatically.
 
   1. replyHandler: handler send to mock-adapter's `reply` method
     **required**
@@ -235,6 +240,61 @@ const axiosDefaultConfig = {
   },
   timeout: 5000,
   withCredentials: true,
+}
+```
+
+
+## Usecase Demo (Webpack)
+
+```js
+import { createAxios, createAPIHandler } from 'axios-mock-shim';
+
+const instance = createAxios({
+  xsrfCookieName: 'myToken',
+  xsrfHeaderName: 'MY-TOKEN',
+});
+
+const api = createAPIHandler(instance, {
+  useMock: process.env.NODE_ENV === 'development',
+  snakifyData: true,
+  beforeRequest(params) {
+    const TOKEN = localStorage.getItem('MY-TOKEN');
+    // console.log(params);
+    return Object.assign(params, {
+      headers: {
+        'MY-Token': TOKEN,
+      },
+    });
+  },
+  beforeResponse(res) {
+    return utils.camelizeKeys(res.data);
+  },
+});
+
+// custom situation request
+// will not be bundled in production
+if (process.env.NODE_ENV === 'development') {
+  const getInfos = [{ id: 3000 }, {
+    test: 'This is test data',
+  }];
+  // trigger as folloing will let Shim plugin cache result for the params
+  api.use('post', 'buy', getInfos[0]).with([400, getInfos[1]]).mock();
+}
+
+export default {
+  getUser() {
+    return api.use('get', 'user').with([200, {
+      username: 'Johnny',
+      age: 3333,
+    }]).run();
+  },
+  postBuy({ id }) {
+    return api.use('post', 'buy', {
+      id,
+    }).with([200, {
+      normal: 'Here is normal response text',
+    }]).run();
+  },
 }
 ```
 

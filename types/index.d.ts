@@ -20,6 +20,7 @@ export interface ICreateAPIOptions {
 
 export interface IUseObject {
   with: Function,
+  mock: Function,
   run: Function,
 }
 

@@ -79,12 +79,12 @@ AxiosRequest.prototype = {
         }
         // runBuilder return the correct method for run
         this.runBuilder = useMock
-            ? (...args) => () => this.useMockRequest(...args)
-            : (...args) => () => this.normalRequest(...args);
+            ? (...args) => () => this._useMockRequest(...args)
+            : (...args) => () => this._normalRequest(...args);
     },
     use(method, svc, data = {}) {
         const parent = this;
-        const { ReplyCache, $options } = this;
+        const { _mock, ReplyCache, $options } = this;
         const { snakifyData, beforeRequest } = $options;
         const methodUp = method.toUpperCase();
         data = snakifyData ? snakifyKeys(data) : data;
@@ -107,15 +107,24 @@ AxiosRequest.prototype = {
                 ReplyCache.set(cacheToken, fn);
                 return this;
             },
+            mock() {
+                const { useMock } = parent.$options;
+                if (!useMock)
+                    return this; // if dont use mock, return this.
+                _mock.call(parent, configs);
+                return this;
+            },
+            // pass configs to runBuilder
+            // "run" will become a function, eg. "() => this._useMockRequest()"
             run: parent.runBuilder.call(parent, configs),
         };
     },
-    useMockRequest(configs) {
-        const { normalRequest, $adapter, ReplyCache, $options } = this;
+    _mock(configs) {
+        const { $adapter, ReplyCache, $options } = this;
         const { anyReply } = $options;
         const cacheToken = stringify(configs);
-        // with mockReply defined & not yet cached
         const hasCache = RequestCache.has(cacheToken);
+        // check cache, avoid duplicate mocked
         if (!hasCache) {
             RequestCache.add(cacheToken);
             // check if cache has the mock data
@@ -126,11 +135,16 @@ AxiosRequest.prototype = {
                 anyReply && mockHandler.call($adapter, configs, anyReply);
             }
         }
+    },
+    _useMockRequest(configs) {
+        const { _mock, _normalRequest } = this;
+        // mock api
+        _mock(configs);
         // Important!! Don't remove this return
         // This return stays for Promise mechanism
-        return normalRequest.call(this, configs);
+        return _normalRequest.call(this, configs);
     },
-    normalRequest({ method, svc, config }) {
+    _normalRequest({ method, svc, config }) {
         const { $instance, $options } = this;
         const { beforeResponse } = $options;
         if (!httpMethodList.has(method.toUpperCase()))
