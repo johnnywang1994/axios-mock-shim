@@ -94,10 +94,26 @@ Define the mock reply data.
     - type: `function(resolve, reject, config)` | `array[statusCode: number, data]`
     > function will get three arguments, when using function type reply, please wrap your data into the first `resolve` method in order to tell the plugin fullfill the Promise.
 
+- **mock**
+
+Trigger the mock feature without calling run, by default, calling `run` will trigger mock automatically, but sometimes we just want to define specific response with some params.
+
+> Just like `with`, if `useMock` is set to `false`, this method will skip the mock. avoiding you from calling `mock` accidently in production mode.
+
+```js
+// Define some special situation response in dev
+if (process.env.NODE_ENV === 'development') {
+  const getInfos = [{ id: 3000 }, {
+    test: 'This is test data',
+  }];
+  // trigger as folloing will let Shim plugin cache result for the params without calling a request
+  api.use('post', 'buy', getInfos[0]).with([400, getInfos[1]]).mock();
+}
+```
 
 - **run()**
 
-Execute the `AxiosRequest`
+Execute the `AxiosRequest`, will execute real request by axios with auto checking for mock cache, if there's no cache yet, will mock & cache the result.
 
 
 ```js

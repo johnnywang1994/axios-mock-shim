@@ -192,7 +192,7 @@ AxiosRequest.prototype = {
     const { _mock, _normalRequest } = this;
 
     // mock api
-    _mock(configs);
+    _mock.call(this, configs);
 
     // Important!! Don't remove this return
     // This return stays for Promise mechanism
