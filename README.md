@@ -25,7 +25,7 @@ Import the plugin with two methods `createAxios`, `createAPIHandler`
 import { createAxios, createAPIHandler } from 'axios-mock-shim';
 ```
 
-- **createAxios(axiosConfig)**
+#### **createAxios(axiosConfig)**
 
 Create Axios instance by given config.（default config or your custom config）
 
@@ -38,7 +38,7 @@ instance.interceptors.response.use(
 );
 ```
 
-- **createAPIHandler(axiosInstance, shimOptions)**
+#### **createAPIHandler(axiosInstance, shimOptions)**
 
 Create an `AxiosRequest` object, which you can then use to define & call the api with specific mock data.
 
@@ -63,7 +63,7 @@ Define your api logic & mock data with your `AxiosRequest` object
 method list: `use`, `with`, `run`
 
 
-- **use(method, svc, data)**
+#### **- use(method, svc, data)**
 
 Define the api setting
 
@@ -81,7 +81,7 @@ Define the api setting
     - type: `object`
 
 
-- **with(replyHandler)**
+#### **- with(replyHandler)**
 
 Define the mock reply data.
 
@@ -94,7 +94,7 @@ Define the mock reply data.
     - type: `function(resolve, reject, config)` | `array[statusCode: number, data]`
     > function will get three arguments, when using function type reply, please wrap your data into the first `resolve` method in order to tell the plugin fullfill the Promise.
 
-- **mock**
+#### **- mock**
 
 Trigger the mock feature without calling run, by default, calling `run` will trigger mock automatically, but sometimes we just want to define specific response with some params.
 
@@ -111,7 +111,11 @@ if (process.env.NODE_ENV === 'development') {
 }
 ```
 
-- **run()**
+#### **- mockOnce()**
+
+calling the mock with `replyOnce`, with only mock request once.
+
+#### **- run()**
 
 Execute the `AxiosRequest`, will execute real request by axios with auto checking for mock cache, if there's no cache yet, will mock & cache the result.
 
@@ -151,6 +155,12 @@ export default {
   },
 };
 ```
+
+#### **- runOnce()**
+
+Same behavior to `run`, but would just mock once. same action as `mockOnce` + `run`.
+
+
 
 ## Options
 

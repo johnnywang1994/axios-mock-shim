@@ -94,6 +94,7 @@ AxiosRequest.prototype = {
             config: configHandler({ methodUp, beforeRequest, data }),
         };
         const cacheToken = stringify(configs);
+        const useOnce = true;
         // Return an object to define mock data & calling
         return {
             with(fn) {
@@ -110,20 +111,20 @@ AxiosRequest.prototype = {
                 const { useMock } = parent.$options;
                 if (!useMock)
                     return this; // if dont use mock, return this.
-                _mock.call(parent, configs, false);
+                _mock.call(parent, configs, !useOnce);
                 return this;
             },
             mockOnce() {
                 const { useMock } = parent.$options;
                 if (!useMock)
                     return this; // if dont use mock, return this.
-                _mock.call(parent, configs, true);
+                _mock.call(parent, configs, useOnce);
                 return this;
             },
             // pass configs to runBuilder
             // "run" will become a function, eg. "() => this._useMockRequest()"
-            run: parent.runBuilder.call(parent, configs, false),
-            runOnce: parent.runBuilder.call(parent, configs, true)
+            run: parent.runBuilder.call(parent, configs, !useOnce),
+            runOnce: parent.runBuilder.call(parent, configs, useOnce)
         };
     },
     _mock(configs, once) {
