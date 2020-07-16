@@ -2,19 +2,29 @@
   "name": "axios-mock-shim",
   "version": "1.1.10",
   "description": "A plugin build for easily using axios-mock-adapter with axios",
-  "main": "./index.js",
-  "dependencies": {
-    "@types/node": "^14.0.11",
-    "axios": "^0.19.2",
-    "axios-mock-adapter": "^1.18.1",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack --config ./config -d --mode development --watch",
+    "build": "cross-env NODE_ENV=production webpack --config ./config -p --mode production"
   },
   "typings": "./types/index.d.ts",
-  "scripts": {
-    "start": "yarn build:live",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node ./index.ts",
-    "build": "tsc -p ./src"
+  "author": "Johnny Wang",
+  "license": "MIT",
+  "repository": "https://github.com/johnnywang1994/axios-mock-shim",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "axios-mock-adapter": "^1.18.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@types/node": "^14.0.23",
+    "babel-loader": "^8.1.0",
+    "cross-env": "^7.0.2",
+    "ts-loader": "^8.0.1",
+    "typescript": "^3.9.6",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
   },
   "files": [
     "/dist",
@@ -29,8 +39,5 @@
     "mock",
     "api",
     "adapter"
-  ],
-  "author": "Johnny Wang",
-  "license": "MIT",
-  "repository": "https://github.com/johnnywang1994/axios-mock-shim"
+  ]
 }

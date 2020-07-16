@@ -1,5 +1,4 @@
-/* eslint-disable */
-const axios = require('axios');
+import axios from 'axios';
 
 /* tools & config */
 import { isObject, isFn, warn } from './utils';
@@ -40,5 +39,10 @@ export function createAPIHandler(
 ) {
   if (!isFn(instance)) return warn('instance invalid', instance);
   if (!isObject(options)) return warn('options invalid', options);
-  return new AxiosRequest(instance, options);
+  return new (AxiosRequest as any)(instance, options);
 }
+
+export default {
+  createAxios,
+  createAPIHandler,
+};

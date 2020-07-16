@@ -7,18 +7,11 @@
     "noLib": false,
     "preserveConstEnums": true,
     "noEmitHelpers": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "watch": true,
-    "baseUrl": "..",
-    "outDir": "../dist"
+    "moduleResolution": "node",
+    "suppressImplicitAnyIndexErrors": true
   },
   "include": [
-    "types/*"
-  ],
-  "files": [
-    "index.ts",
-    "config.ts",
-    "request.ts",
-    "utils.ts",
+    "types/*",
+    "src/*"
   ]
 }
