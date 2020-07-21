@@ -1,1 +1,1 @@
-export * from './dist/axios-mock-shim.min';
+module.exports = require('./dist/axios-mock-shim.min');
