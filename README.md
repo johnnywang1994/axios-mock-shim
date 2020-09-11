@@ -134,7 +134,7 @@ export default {
 
   // function type reply
   getSoloConfig() {
-    return api.use('get', 'profile', { id: 100 })
+    return api.use('post', 'profile', { id: 100 })
       .with((resolve, reject, config) => {
         console.log(config); // mock-adapter's config
         res([
